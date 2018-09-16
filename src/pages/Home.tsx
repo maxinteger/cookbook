@@ -8,9 +8,10 @@ import AddIcon from '@material-ui/icons/Add'
 import Typography from '@material-ui/core/Typography'
 import { withStyles, WithStyles } from '@material-ui/core/styles'
 import { AddRecipe } from '../components/AddRecipe'
-import { getRecipes } from '../service/recipe'
+import { recipeService } from '../service'
 import { pipe } from 'ramda'
 import { RouteComponentProps, withRouter } from 'react-router'
+import {Recipe} from '../service/model'
 
 interface Props extends WithStyles<typeof styles>, RouteComponentProps<{ recipeId: string }> {}
 
@@ -66,7 +67,7 @@ export const Home = pipe(
     }
 
     public componentDidMount() {
-      getRecipes().then(recipes => this.setState({ recipes }))
+      recipeService.getAll().then(recipes => console.log(recipes) || this.setState({ recipes }))
     }
 
     private openModal = () => this.setState({ open: true })

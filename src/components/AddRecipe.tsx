@@ -6,13 +6,9 @@ import DialogActions from '@material-ui/core/DialogActions'
 import Button from '@material-ui/core/Button'
 import Grid from '@material-ui/core/Grid'
 import TextField from '@material-ui/core/TextField'
-import { newRecipe } from '../service/recipe'
+import { recipeService } from '../service'
 import { SyntheticEvent } from 'react'
-
-enum ModalResponse {
-  Cancel,
-  OK
-}
+import {ModalResponse, Recipe} from '../service/model'
 
 interface Props {
   open: boolean
@@ -31,7 +27,7 @@ export class AddRecipe extends React.Component<Props, State> {
     }
   }
   private store = () => {
-    newRecipe(this.state.recipe)
+    recipeService.create(this.state.recipe)
   }
 
   private changeValue = (e: SyntheticEvent<any>) => {

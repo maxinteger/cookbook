@@ -3,10 +3,14 @@ import { pipe } from 'ramda'
 import withStyles, { WithStyles } from '@material-ui/core/styles/withStyles'
 import Typography from '@material-ui/core/Typography/Typography'
 import Paper from '@material-ui/core/Paper/Paper'
+import IconButton from '@material-ui/core/IconButton/IconButton'
+import ArrowBack from '@material-ui/icons/ArrowBack'
 import { RouteComponentProps, withRouter } from 'react-router'
-import { getRecipe } from '../service/recipe'
+import { recipeService } from '../service'
 import CircularProgress from '@material-ui/core/CircularProgress/CircularProgress'
 import Divider from '@material-ui/core/Divider/Divider'
+import {Recipe} from '../service/model'
+import Grid from '@material-ui/core/Grid/Grid'
 
 interface Props extends WithStyles<typeof styles>, RouteComponentProps<{ recipeId: string }> {}
 
@@ -52,11 +56,19 @@ export const RecipeDetailPage = pipe(
     state = {} as State
 
     componentDidMount() {
+    	this.loadData()
+		}
+
+    loadData() {
       this.setState({ loading: true })
       const recipeId = this.props.match.params.recipeId
-      getRecipe(recipeId)
+      recipeService.get(recipeId)
         .then(recipe => this.setState({ loading: false, recipe }))
         .catch(error => this.setState({ loading: false, error }))
+    }
+
+    private back = () => {
+      this.props.history.push('/')
     }
 
     public render() {
@@ -94,7 +106,12 @@ export const RecipeDetailPage = pipe(
 
       return (
         <>
-          <Typography variant="title">{recipe.title}</Typography>
+					<Grid container direction="row" justify="flex-start" alignItems="center">
+						<IconButton aria-label="Vissza" onClick={this.back}>
+							<ArrowBack />
+						</IconButton>
+          	<Typography variant="title">{recipe.title}</Typography>
+					</Grid>
           <Divider/>
           <Typography variant="body2">{recipe.description}</Typography>
         </>
