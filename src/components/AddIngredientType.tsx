@@ -16,6 +16,7 @@ import MenuItem from '@material-ui/core/MenuItem/MenuItem'
 
 interface Props {
   open: boolean
+  ingredientId?: string
   onClose: (result: ModalResponse) => void
 }
 
@@ -23,15 +24,25 @@ interface State {
   ingredient: IngredientType
 }
 
+const defaultIngredient: IngredientType = {
+  id: undefined,
+  name: '',
+  defaultUnit: Unit.g,
+  defaultValue: 1
+}
+
 export class AddIngredientType extends React.Component<Props, State> {
-  state = {
-    ingredient: {
-      id: undefined,
-      name: '',
-      defaultUnit: Unit.g,
-      defaultValue: 1
+  componentWillReceiveProps(nextProps: Props) {
+    if (nextProps.open) {
+      this.setState({ ingredient: defaultIngredient })
+      if (nextProps.ingredientId) {
+        ingredientTypeService
+          .get(nextProps.ingredientId)
+          .then(ingredient => console.log(ingredient) || this.setState({ ingredient }))
+      }
     }
   }
+
   private store = () => {
     ingredientTypeService
       .store(this.state.ingredient)
@@ -48,6 +59,10 @@ export class AddIngredientType extends React.Component<Props, State> {
 
   public render() {
     const { open } = this.props
+    if (!open) {
+      return null
+    }
+
     const { ingredient } = this.state
     const title = ingredient.id ? `${ingredient.name} módosítása` : 'Új hozzávaló típus felvétele'
 
@@ -59,10 +74,11 @@ export class AddIngredientType extends React.Component<Props, State> {
             <Grid item xs={12}>
               <TextField
                 required
-                id="recipe-title"
+                id="ingredient-name"
                 name="name"
                 label="Hozzávaló neve"
                 fullWidth
+                value={ingredient.name}
                 onChange={this.changeValue}
               />
             </Grid>
@@ -80,7 +96,7 @@ export class AddIngredientType extends React.Component<Props, State> {
                 inputProps={{
                   min: 0
                 }}
-                defaultValue={ingredient.defaultValue}
+                value={ingredient.defaultValue}
                 onChange={this.changeValue}
               />
             </Grid>

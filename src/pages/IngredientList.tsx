@@ -16,11 +16,14 @@ import ListItem from '@material-ui/core/ListItem/ListItem'
 import ListItemText from '@material-ui/core/ListItemText/ListItemText'
 import { IngredientType, ModalResponse } from '../service/model'
 import Grid from '@material-ui/core/Grid/Grid'
+import ListItemIcon from '@material-ui/core/ListItemIcon/ListItemIcon'
+import EditIcon from '@material-ui/icons/Edit'
 
 interface Props extends WithStyles<typeof styles>, RouteComponentProps<{ recipeId: string }> {}
 
 interface State {
   open: boolean
+  selectedItemId?: string
   ingredientTypes: IngredientType[]
   loading: boolean
   error: any
@@ -48,8 +51,8 @@ const styles: any = ({ breakpoints, spacing }: any) => ({
     }
   },
   list: {
-		marginTop: spacing.unit * 3,
-		marginBottom: spacing.unit * 3,
+    marginTop: spacing.unit * 3,
+    marginBottom: spacing.unit * 3
   },
   progress: {
     display: 'block',
@@ -67,14 +70,15 @@ export const IngredientList = pipe(
       open: false,
       ingredientTypes: [],
       loading: false,
-      error: undefined
+      error: undefined,
+      selectedItemId: undefined
     } as State
 
     componentDidMount() {
       this.loadDate()
     }
 
-    loadDate() {
+    private loadDate() {
       this.setState({ loading: true })
       ingredientTypeService
         .getAll()
@@ -85,7 +89,7 @@ export const IngredientList = pipe(
     private openModal = () => this.setState({ open: true })
 
     private handleClose = (res: ModalResponse) => {
-      this.setState({ open: false })
+      this.setState({ open: false, selectedItemId: undefined })
       if (res === ModalResponse.OK) {
         this.loadDate()
       }
@@ -95,8 +99,13 @@ export const IngredientList = pipe(
       this.props.history.push('/')
     }
 
+    private editIngredient = (id?: string) => () => {
+      this.setState({ open: true, selectedItemId: id })
+    }
+
     public render() {
       const { classes } = this.props
+      const { open, selectedItemId } = this.state
       return (
         <main className={classes.layout}>
           <Paper className={classes.paper}>
@@ -106,15 +115,17 @@ export const IngredientList = pipe(
               </IconButton>
               <Typography variant="title">Hozzávalók listája</Typography>
             </Grid>
-            <div className={classes.list}>
-              {this.renderContent()}
-            </div>
+            <div className={classes.list}>{this.renderContent()}</div>
             <div>
               <Button variant="contained" color="primary" onClick={this.openModal}>
                 Új hozzávaló felvétele
               </Button>
             </div>
-            <AddIngredientType open={this.state.open} onClose={this.handleClose} />
+            <AddIngredientType
+              open={open}
+              ingredientId={selectedItemId}
+              onClose={this.handleClose}
+            />
           </Paper>
         </main>
       )
@@ -126,7 +137,7 @@ export const IngredientList = pipe(
       if (error) {
         return (
           <Typography align="center" variant="caption" color="error">
-            Upsz. A recept nemtalálható
+            Upsz. Valami hiba történt.
           </Typography>
         )
       }
@@ -150,7 +161,10 @@ export const IngredientList = pipe(
     private renderIngredientType = (item: IngredientType) => {
       return (
         <React.Fragment key={item.id}>
-          <ListItem button>
+          <ListItem button onClick={this.editIngredient(item.id)}>
+            <ListItemIcon>
+              <EditIcon />
+            </ListItemIcon>
             <ListItemText primary={item.name} />
           </ListItem>
           <Divider light />
