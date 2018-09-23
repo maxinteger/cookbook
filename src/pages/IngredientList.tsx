@@ -75,10 +75,10 @@ export const IngredientList = pipe(
     } as State
 
     componentDidMount() {
-      this.loadDate()
+      this.loadData()
     }
 
-    private loadDate() {
+    private loadData() {
       this.setState({ loading: true })
       ingredientTypeService
         .getAll()
@@ -91,7 +91,7 @@ export const IngredientList = pipe(
     private handleClose = (res: ModalResponse) => {
       this.setState({ open: false, selectedItemId: undefined })
       if (res === ModalResponse.OK) {
-        this.loadDate()
+        this.loadData()
       }
     }
 

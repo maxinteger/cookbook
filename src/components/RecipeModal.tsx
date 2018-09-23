@@ -1,4 +1,5 @@
 import * as React from 'react'
+import { SyntheticEvent } from 'react'
 import Dialog from '@material-ui/core/Dialog'
 import DialogTitle from '@material-ui/core/DialogTitle'
 import DialogContent from '@material-ui/core/DialogContent'
@@ -7,11 +8,11 @@ import Button from '@material-ui/core/Button'
 import Grid from '@material-ui/core/Grid'
 import TextField from '@material-ui/core/TextField'
 import { recipeService } from '../service'
-import { SyntheticEvent } from 'react'
-import {ModalResponse, Recipe} from '../service/model'
+import { ModalResponse, Recipe } from '../service/model'
 
 interface Props {
   open: boolean
+  recipeId?: string
   onClose: (result: ModalResponse) => void
 }
 
@@ -19,15 +20,25 @@ interface State {
   recipe: Recipe
 }
 
-export class AddRecipe extends React.Component<Props, State> {
-  state = {
-    recipe: {
-      title: '',
-      description: ''
+const defaultRecipe = {
+  title: '',
+  description: ''
+}
+
+export class RecipeModal extends React.Component<Props, State> {
+  componentWillReceiveProps(nextProps: Props) {
+    if (nextProps.open) {
+      this.setState({ recipe: defaultRecipe })
+      if (nextProps.recipeId) {
+        recipeService
+          .get(nextProps.recipeId)
+          .then(recipe => console.log(recipe) || this.setState({ recipe }))
+      }
     }
   }
+
   private store = () => {
-    recipeService.create(this.state.recipe)
+    recipeService.store(this.state.recipe).then(() => this.props.onClose(ModalResponse.OK))
   }
 
   private changeValue = (e: SyntheticEvent<any>) => {
@@ -40,6 +51,12 @@ export class AddRecipe extends React.Component<Props, State> {
 
   public render() {
     const { open } = this.props
+    if (!open) {
+      return null
+    }
+
+    const { recipe } = this.state
+
     return (
       <Dialog open={open} onClose={this.cancel}>
         <DialogTitle>Új rencept felvitele</DialogTitle>
@@ -53,6 +70,7 @@ export class AddRecipe extends React.Component<Props, State> {
                 label="Recept neve"
                 fullWidth
                 onChange={this.changeValue}
+                value={recipe.title}
               />
             </Grid>
             <Grid item xs={12}>
@@ -65,6 +83,7 @@ export class AddRecipe extends React.Component<Props, State> {
                 rowsMax={20}
                 fullWidth
                 onChange={this.changeValue}
+                value={recipe.description}
               />
             </Grid>
           </Grid>

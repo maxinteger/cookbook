@@ -7,11 +7,11 @@ import Grid from '@material-ui/core/Grid'
 import AddIcon from '@material-ui/icons/Add'
 import Typography from '@material-ui/core/Typography'
 import { withStyles, WithStyles } from '@material-ui/core/styles'
-import { AddRecipe } from '../components/AddRecipe'
+import { RecipeModal } from '../components/RecipeModal'
 import { recipeService } from '../service'
 import { pipe } from 'ramda'
 import { RouteComponentProps, withRouter } from 'react-router'
-import {Recipe} from '../service/model'
+import { Recipe } from '../service/model'
 
 interface Props extends WithStyles<typeof styles>, RouteComponentProps<{ recipeId: string }> {}
 
@@ -91,7 +91,7 @@ export const Home = pipe(
           >
             <AddIcon />
           </Button>
-          <AddRecipe open={this.state.open} onClose={this.handleClose} />
+          <RecipeModal open={this.state.open} onClose={this.handleClose} />
 
           <div className={`${classes.layout} ${classes.cardGrid}`}>
             <Grid container spacing={40}>

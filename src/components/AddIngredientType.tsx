@@ -38,7 +38,7 @@ export class AddIngredientType extends React.Component<Props, State> {
       if (nextProps.ingredientId) {
         ingredientTypeService
           .get(nextProps.ingredientId)
-          .then(ingredient => console.log(ingredient) || this.setState({ ingredient }))
+          .then(ingredient => this.setState({ ingredient }))
       }
     }
   }

@@ -1,20 +1,23 @@
 import * as React from 'react'
-import { pipe } from 'ramda'
-import withStyles, { WithStyles } from '@material-ui/core/styles/withStyles'
+import {pipe} from 'ramda'
+import withStyles, {WithStyles} from '@material-ui/core/styles/withStyles'
 import Typography from '@material-ui/core/Typography/Typography'
 import Paper from '@material-ui/core/Paper/Paper'
 import IconButton from '@material-ui/core/IconButton/IconButton'
 import ArrowBack from '@material-ui/icons/ArrowBack'
-import { RouteComponentProps, withRouter } from 'react-router'
-import { recipeService } from '../service'
+import {RouteComponentProps, withRouter} from 'react-router'
+import {recipeService} from '../service'
 import CircularProgress from '@material-ui/core/CircularProgress/CircularProgress'
 import Divider from '@material-ui/core/Divider/Divider'
-import {Recipe} from '../service/model'
+import {ModalResponse, Recipe} from '../service/model'
 import Grid from '@material-ui/core/Grid/Grid'
+import EditIcon from '@material-ui/icons/Edit'
+import {RecipeModal} from '../components/RecipeModal'
 
 interface Props extends WithStyles<typeof styles>, RouteComponentProps<{ recipeId: string }> {}
 
 interface State {
+  open: boolean
   recipe: Recipe
   loading: boolean
   error: any
@@ -41,10 +44,10 @@ const styles: any = ({ breakpoints, spacing }: any) => ({
       padding: spacing.unit * 3
     }
   },
-	progress: {
+  progress: {
     display: 'block',
-		marginLeft: 'auto',
-		marginRight: 'auto'
+    marginLeft: 'auto',
+    marginRight: 'auto'
   }
 })
 
@@ -56,13 +59,14 @@ export const RecipeDetailPage = pipe(
     state = {} as State
 
     componentDidMount() {
-    	this.loadData()
-		}
+      this.loadData()
+    }
 
-    loadData() {
+    private loadData() {
       this.setState({ loading: true })
       const recipeId = this.props.match.params.recipeId
-      recipeService.get(recipeId)
+      recipeService
+        .get(recipeId)
         .then(recipe => this.setState({ loading: false, recipe }))
         .catch(error => this.setState({ loading: false, error }))
     }
@@ -71,17 +75,32 @@ export const RecipeDetailPage = pipe(
       this.props.history.push('/')
     }
 
+    private edit = () => {
+      this.setState({ open: true })
+    }
+
+    private handleClose = (res: ModalResponse) => {
+      this.setState({ open: false })
+      if (res === ModalResponse.OK) {
+        this.loadData()
+      }
+    }
+
     public render() {
       const { classes } = this.props
+      const { open } = this.state
+      const recipeId = this.props.match.params.recipeId
+
       return (
         <main className={classes.layout}>
           <Paper className={classes.paper}>{this.renderContent()}</Paper>
+          <RecipeModal open={open} recipeId={recipeId} onClose={this.handleClose} />
         </main>
       )
     }
 
     private renderContent() {
-      const { classes } = this.props;
+      const { classes } = this.props
       const { error, recipe } = this.state
       if (error) {
         return (
@@ -95,7 +114,7 @@ export const RecipeDetailPage = pipe(
         return this.renderRecipe()
       }
 
-      return <CircularProgress className={classes.progress} size={50}/>
+      return <CircularProgress className={classes.progress} size={50} />
     }
 
     private renderRecipe() {
@@ -106,13 +125,16 @@ export const RecipeDetailPage = pipe(
 
       return (
         <>
-					<Grid container direction="row" justify="flex-start" alignItems="center">
-						<IconButton aria-label="Vissza" onClick={this.back}>
-							<ArrowBack />
-						</IconButton>
-          	<Typography variant="title">{recipe.title}</Typography>
-					</Grid>
-          <Divider/>
+          <Grid container direction="row" justify="flex-start" alignItems="center">
+            <IconButton aria-label="Vissza" onClick={this.back}>
+              <ArrowBack />
+            </IconButton>
+            <IconButton aria-label="Szerkesztés" onClick={this.edit}>
+              <EditIcon />
+            </IconButton>
+            <Typography variant="title">{recipe.title}</Typography>
+          </Grid>
+          <Divider />
           <Typography variant="body2">{recipe.description}</Typography>
         </>
       )
